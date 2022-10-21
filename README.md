@@ -32,6 +32,10 @@ bash download_pretrained.sh
 ```
 python script_inference.py --config "configs/patchcore_hazelnut.yaml" --weight "models/patchcore_hazelnut.ckpt" --image "samples/007_hazelnut.png"
 ```
+or just simple:
+```
+python script_inference.py
+```
 ## App (Gradio)
 ```
 python demo.py
