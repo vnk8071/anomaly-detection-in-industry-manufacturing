@@ -19,6 +19,8 @@ pip install -r requirements.txt
 ## Flow
 <img src='static_images/flow-app.jpg'>
 
+## TODO: Custom dataset (Coming soon)
+
 ## Train
 ```
 python train.py --config "configs/patchcore_grid.yaml" --model "patchcore"
@@ -28,6 +30,8 @@ or download pretrained models
 ```
 bash download_pretrained.sh
 ```
+
+## Evaluation (Coming soon)
 ## Inference
 ```
 python script_inference.py --config "configs/patchcore_hazelnut.yaml" --weight "models/patchcore_hazelnut.ckpt" --image "samples/007_hazelnut.png"
