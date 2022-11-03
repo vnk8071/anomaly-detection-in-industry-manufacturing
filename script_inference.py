@@ -3,6 +3,7 @@ import numpy as np
 import time
 
 import cv2
+import matplotlib.pyplot as plt
 from skimage.segmentation import mark_boundaries
 from custom_inference import TorchInferencer
 from anomalib.post_processing.post_process import (
@@ -12,9 +13,9 @@ from anomalib.post_processing.post_process import (
 
 def get_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--config", type=str, help="Path to a config file", default='configs/patchcore_grid.yaml')
-    parser.add_argument("--weight", type=str, help="Path to model weights", default='models/patchcore_grid.ckpt')
-    parser.add_argument("--image", type=str, default='samples/006_grid.png')
+    parser.add_argument("--config", type=str, help="Path to a config file", default='configs/patchcore_aqa.yaml')
+    parser.add_argument("--weight", type=str, help="Path to model weights", default='models/patchcore_wide_resnet50_aqa_new.ckpt')
+    parser.add_argument("--image", type=str, default='samples/1_0.png')
     return parser.parse_args()
 
 def get_inferencer(args):
@@ -26,7 +27,7 @@ def get_inferencer(args):
     Raises:
         ValueError: If unsupported model weight is passed.
     Returns:
-        Inferencer: Torch or OpenVINO inferencer.
+        Inferencer: Torch inferencer.
     """
     if args.weight.endswith(".ckpt"):
         inferencer = TorchInferencer(config=args.config, model_source=args.weight)
@@ -35,6 +36,7 @@ def get_inferencer(args):
     return inferencer
 
 def inference(args, inferencer):
+    start = time.time()
     filename = args.image.rsplit('/')[-1]
     image = cv2.imread(args.image)
     predictions = inferencer.predict(image=image)
@@ -46,15 +48,26 @@ def inference(args, inferencer):
     else:
         output = add_normal_label(output, 1 - predictions.pred_score)
     output = (output * 255).astype(np.uint8)
+    end = time.time()
+    print(f"Time elapsed: {end - start} second")
+
     cv2.imwrite("results_inference/"+ filename, output)
+    fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(15, 10),)
+    ax1.set_title("Anomaly map")
+    ax1.imshow(predictions.anomaly_map)
+    ax2.set_title("Heat map")
+    ax2.imshow(predictions.heat_map)
+    ax3.set_title("Mask")
+    ax3.imshow(predictions.pred_mask)
+    ax4.set_title("Segmentation")
+    ax4.imshow(predictions.segmentations)
+    plt.show()
     return (predictions.pred_score, predictions.pred_label)
 
 if __name__ == "__main__":
-    start = time.time()
+    
     args = get_args()
     inferencer = get_inferencer(args)
     pred_score, pred_label = inference(args, inferencer)
-    end = time.time()
     print(f"Anomaly score: {pred_score:.4f} - Target label: {pred_label}")
-    print(f"Time elapsed: {end - start} second")
 

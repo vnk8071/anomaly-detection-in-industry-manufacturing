@@ -5,6 +5,7 @@ import gradio as gr
 from custom_inference import TorchInferencer
 
 user_select = {
+    'aqa': ['configs/patchcore_aqa.yaml', 'models/patchcore_aqa.ckpt'],
     'grid': ['configs/patchcore_grid.yaml', 'models/patchcore_grid.ckpt'],
     'hazelnut': ['configs/patchcore_hazelnut.yaml', 'models/patchcore_hazelnut.ckpt'],
     'metalnut': ['configs/patchcore_metalnut.yaml', 'models/patchcore_metalnut.ckpt']
@@ -32,13 +33,13 @@ if __name__ == '__main__':
         with gr.Row():
             with gr.Column():
                 inputs=[
-                    gr.Dropdown(["grid", "hazelnut", "metalnut"], label="Choose object and texture category:", value="grid"),
+                    gr.Dropdown(["aqa", "grid", "hazelnut", "metalnut"], label="Choose object and texture category:", value="aqa"),
                     gr.inputs.Image(
                         shape=None, image_mode="RGB", source="upload", tool="editor", type="numpy", label="Image"
                     ),
                 ]
                 predict = gr.Button("Predict")  
-                examples = gr.Examples(examples=[["grid", "data/grid/test/bent/006.png"], ["hazelnut", "data/hazelnut/test/crack/004.png"], ["metalnut", "data/metal_nut/test/bent/005.png"]], inputs=inputs)
+                examples = gr.Examples(examples=[["aqa", "samples/1_0.png"], ["grid", "data/grid/test/bent/006.png"], ["hazelnut", "data/hazelnut/test/crack/004.png"], ["metalnut", "data/metal_nut/test/bent/005.png"]], inputs=inputs)
             with gr.Column():
                 outputs=[
                     gr.Text(label="Anomaly Score:"),
