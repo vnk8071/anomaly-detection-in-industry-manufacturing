@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="content">
+    <h3>Dataset</h3>
+    <p>
+        MVTec AD is a dataset for benchmarking anomaly detection methods with a focus on industrial inspection. It
+        contains over 5000 high-resolution images divided into fifteen different object and texture categories. Each
+        category comprises a set of defect-free training images and a test set of images with various kinds of defects
+        as well as images without defects.
+    </p>
+    <img src='static/mvtec_dataset.jpg'>
+    <p>Link dataset: <a href="https://www.mvtec.com/company/research/datasets/mvtec-ad">MVTec-AD Dataset</a>
+        <hr>
+        <center>
+            <a href="{{ url_for('index') }}"><button class="btn btn-outline-primary btn-block" style="width: 50%;">Kick
+                    start
+                    your brain</button></a>
+        </center>
+</div>
+{% endblock %}

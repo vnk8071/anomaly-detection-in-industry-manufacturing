@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+<ul class=flashes>
+    {% for category, message in messages %}
+    <li class="{{ category }}">{{ message }}</li>
+    {% endfor %}
+</ul>
+{% endif %}
+{% endwith %}
+<div class="content-row">
+    <div class="content-column">
+        <center>
+            <h3>Input image</h3>
+        </center>
+        <img class="center" src="{{image_upload}}" width="80%">
+    </div>
+    <div class="content-column">
+        <center>
+            <h3>Prediction</h3>
+        </center>
+        <h4>Anomaly Score: {{anomaly_score}}</h4>
+        <h4>Target label: {{target}}</h4>
+        <h4>Heatmap:</h4>
+        <img class="center" src="{{image_predict}}" width="80%">
+    </div>
+</div>
+<hr>
+<!-- <nav style="text-align: center;">
+    <h3>Flow:</h3>
+    <img src="static/images/flow-app.jpg" style="width: 100%">
+</nav>
+<article>
+
+</article> -->
+<center>
+    <a href="{{index}}"><button class="btn btn-outline-primary btn-block" style="width: 50%;">Next
+            predict</button></a>
+</center>
+{% endblock %}

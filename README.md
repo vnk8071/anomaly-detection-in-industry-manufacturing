@@ -19,8 +19,12 @@ pip install -r requirements.txt
 ## Flow
 <img src='static_images/flow-app.jpg'>
 
-## TODO: Custom dataset (Coming soon)
-
+## Custom dataset
+For each new dataset, the data consist of three folders:
+- train, which contains the (defect-free) training images
+- test, which contains the test images
+- ground_truth, which contains the pixel-precise annotations of anomalous regions
+<img src='static_images/data_structure.jpg'>
 ## Train
 ```
 python train.py --config "configs/patchcore_grid.yaml" --model "patchcore"
@@ -40,7 +44,8 @@ or just simple:
 ```
 python script_inference.py
 ```
-## App (Gradio)
+## App 
+### Gradio
 ```
 python demo.py
 ```
@@ -48,6 +53,15 @@ Open local URL: http://127.0.0.1:7860
 
 Sample:
 <img src='static_images/predict_demo.jpg'>
+
+### Flask
+```
+python app.py
+```
+Open local URL: http://127.0.0.1:5000
+
+Sample:
+<img src='static_images/flask_app.jpg'>
 ## Container (Coming soon)
 
 ## Deploy (Coming soon)
