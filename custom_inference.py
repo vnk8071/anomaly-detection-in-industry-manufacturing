@@ -224,6 +224,7 @@ class TorchInferencer(Inferencer):
         # Check and load the configuration
         if isinstance(config, (str, Path)):
             self.config = get_configurable_parameters(config_path=config)
+            self.config['dataset']
         elif isinstance(config, (DictConfig, ListConfig)):
             self.config = config
         else:
