@@ -97,7 +97,7 @@ def logout():  # define the logout function
 @app.route('/train', methods=['GET', 'POST'])
 def training():    
     if request.method == 'POST':
-        if not request.files["zip_input"] or not request.form["user_category"]:
+        if not request.files["zip_input"]:
             flash('Please attach file for training', 'warning')
             return render_template("train.html", name=current_user.name)
         else:
