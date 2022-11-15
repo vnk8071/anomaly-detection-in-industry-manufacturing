@@ -25,6 +25,7 @@ For each new dataset, the data consist of three folders:
 - test, which contains the test images
 - ground_truth, which contains the pixel-precise annotations of anomalous regions
 <img src='static_images/data_structure.jpg'>
+
 ## Train
 ```
 python train.py --config "configs/patchcore_grid.yaml" --model "patchcore"
