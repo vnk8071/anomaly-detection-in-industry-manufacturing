@@ -63,6 +63,34 @@ Open local URL: http://127.0.0.1:5000
 
 Sample:
 <img src='static_images/flask_app.jpg'>
-## Container (Coming soon)
 
-## Deploy (Coming soon)
+## Container
+```
+docker build -t anomaly:v1 .
+docker run anomaly:v1
+```
+
+or just simple
+
+```
+docker-compose up
+```
+## Deploy AWS
+First: Create EC2 instance 
+
+Second: git clone and install related packages
+```
+git clone https://github.com/vnk8071/anomaly-detection-in-industry-manufacturing.git
+
+sh download_pretrained.sh
+```
+Next: install Miniconda and Docker engine
+
+- Miniconda: Follow link https://varhowto.com/install-miniconda-ubuntu-18-04/
+- Docker engine: Follow link https://docs.docker.com/engine/install/ubuntu/
+
+```
+docker-compose up
+```
+
+Final: access link http://user-IPv4-public-ec2-aws

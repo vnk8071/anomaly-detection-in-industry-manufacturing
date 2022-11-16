@@ -1,13 +1,15 @@
 dataset:
-  name: mvtec #options: [mvtec, btech, folder]
+  name: mvtec
   format: mvtec
   path: ./data
   task: segmentation
-  category: custom
-  image_size: 224
-  train_batch_size: 32
+  category: aqa
+  image_size:
+  - 224
+  - 224
+  train_batch_size: 256
   test_batch_size: 1
-  num_workers: 8
+  num_workers: 2
   transform_config:
     train: null
     val: null
@@ -17,61 +19,56 @@ dataset:
     tile_size: null
     stride: null
     remove_border_count: 0
-    use_random_tiling: False
+    use_random_tiling: false
     random_tile_count: 16
-
 model:
   name: patchcore
-  backbone: wide_resnet50_2
+  backbone: resnet18
   pre_trained: true
   layers:
-    - layer2
-    - layer3
-  coreset_sampling_ratio: 0.1
+  - layer2
+  - layer3
+  coreset_sampling_ratio: 0.01
   num_neighbors: 9
-  normalization_method: min_max # options: [null, min_max, cdf]
-
+  normalization_method: min_max
+  input_size:
+  - 224
+  - 224
 metrics:
   image:
-    - F1Score
-    - AUROC
+  - F1Score
+  - AUROC
   pixel:
-    - F1Score
-    - AUROC
+  - F1Score
+  - AUROC
   threshold:
     image_default: 0
     pixel_default: 0
     adaptive: true
-
 visualization:
-  show_images: False # show images on the screen
-  save_images: True # save images to the file system
-  log_images: True # log images to the available loggers (if any)
-  image_save_path: null # path to which images will be saved
-  mode: full # options: ["full", "simple"]
-
+  show_images: false
+  save_images: false
+  log_images: false
+  image_save_path: null
+  mode: simple
 project:
   seed: 0
-  path: ./results
-
+  path: results/patchcore/mvtec/aqa
 logging:
-  logger: [] # options: [comet, tensorboard, wandb, csv] or combinations.
-  log_graph: false # Logs the model graph to respective logger.
-
+  logger: []
+  log_graph: false
 optimization:
-  export_mode: null # options: onnx, openvino
-
-# PL Trainer Args. Don't add extra parameter here.
+  export_mode: null
 trainer:
-  accelerator: auto # <"cpu", "gpu", "tpu", "ipu", "hpu", "auto">
+  accelerator: cpu
   accumulate_grad_batches: 1
   amp_backend: native
   auto_lr_find: false
-  auto_scale_batch_size: false
+  auto_scale_batch_size: true
   auto_select_gpus: false
   benchmark: false
-  check_val_every_n_epoch: 1 # Don't validate before extracting features.
-  default_root_dir: null
+  check_val_every_n_epoch: 1
+  default_root_dir: results/patchcore/mvtec/aqa
   detect_anomaly: false
   deterministic: false
   devices: 1
@@ -79,7 +76,7 @@ trainer:
   enable_model_summary: true
   enable_progress_bar: true
   fast_dev_run: false
-  gpus: null # Set automatically
+  gpus: null
   gradient_clip_val: 0
   ipus: null
   limit_predict_batches: 1.0
@@ -93,7 +90,7 @@ trainer:
   max_time: null
   min_epochs: null
   min_steps: null
-  move_metrics_to_cpu: false
+  move_metrics_to_cpu: true
   multiple_trainloader_mode: max_size_cycle
   num_nodes: 1
   num_processes: null
@@ -108,4 +105,4 @@ trainer:
   sync_batchnorm: false
   tpu_cores: null
   track_grad_norm: -1
-  val_check_interval: 1.0 # Don't validate before extracting features.
+  val_check_interval: 1.0
