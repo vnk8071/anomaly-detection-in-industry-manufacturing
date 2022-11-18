@@ -109,6 +109,9 @@ def training():
                 zip_ref.extractall("./data")
             config = get_configurable_parameters(model_name="patchcore", config_path="configs/custom.yaml")
             config['dataset']['category'] = file_name
+            config['project']['path'] = "./results"
+            config['trainer']['default_root_dir'] = None
+
             save_yaml = OmegaConf.create(config)
             with tempfile.NamedTemporaryFile() as fp:
                 OmegaConf.save(config=save_yaml, f="configs/" + file_name + ".yaml")
@@ -129,9 +132,9 @@ def training():
             trainer.test(model=model, datamodule=datamodule)
 
             # Move weight to models folder
-            src_dir = f"results/patchcore/mvtec/{file_name}/weights/model.ckpt"
+            src_dir = f"results/weights/model.ckpt"
             dst_dir = f"models/{file_name}.ckpt"
-            shutil.copy(src_dir,dst_dir)
+            shutil.move(src_dir, dst_dir)
             flash('Training successful!')
     return render_template("train.html", name=current_user.name, user_select=user_select)
 

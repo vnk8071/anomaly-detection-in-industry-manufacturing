@@ -7,7 +7,7 @@ services:
     build: .
     ports:
       - "5000:5000"
-      - "5000:80"
+      - "80:5000"
     volumes:
       - .:/anomaly
     restart: always
