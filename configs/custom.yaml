@@ -3,7 +3,7 @@ dataset:
   format: mvtec
   path: ./data
   task: segmentation
-  category: aqa
+  category: custom
   image_size:
     - 224
     - 224
