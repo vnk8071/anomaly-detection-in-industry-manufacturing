@@ -61,8 +61,21 @@ python app.py
 ```
 Open local URL: http://127.0.0.1:5000
 
-Sample:
-<img src='static_images/flask_app.jpg'>
+Default account login:
+- Username: aicamp_batch9
+- Password: 123456
+
+Homepage:
+<img src='static_images/flask_homepage.jpg'>
+
+Train:
+<img src='static_images/flask_train.jpg'>
+
+Inference:
+<img src='static_images/flask_inference.jpg'>
+
+Database:
+<img src='static_images/flask_database.jpg'>
 
 ## Container
 ```
