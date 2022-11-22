@@ -8,43 +8,58 @@ import datetime
 import zipfile
 import tempfile
 from omegaconf import OmegaConf
-import pandas as pd
-from flask import render_template, request, flash, redirect, url_for, Blueprint
-from wtforms.validators import ValidationError
+from flask import render_template, request, flash, redirect, url_for
 from flask_login import login_user, login_required, current_user, logout_user
 from werkzeug.security import check_password_hash, generate_password_hash
 from __init__ import create_app
 from models import AnomalyDatabase, User
-from database import db, drop_table
+from database import db
 
-from script_inference import get_args, get_inferencer, inference 
 from pytorch_lightning import Trainer
-from custom_inference import TorchInferencer
+from anomalib.deploy import TorchInferencer
 from anomalib.config import get_configurable_parameters
 from anomalib.data import get_datamodule
 from anomalib.models import get_model
 from anomalib.utils.callbacks import LoadModelCallback, get_callbacks
-from anomalib.utils.loggers import configure_logger, get_experiment_logger
+from anomalib.utils.loggers import get_experiment_logger
 
+# Initial params and app
 logger = logging.getLogger("anomalib")
-
+if not os.path.exists("models/"):
+    os.makedirs("models/")
 user_select = [file.rsplit("/")[-1].split(".")[0] for file in os.listdir("models/")]
-
 app = create_app()
 app.app_context().push()
 db.create_all()
 
 def time_save():
+    r"""Auto generate current datetime.
+    Example:
+        Datetime format %d%m%Y_%H%M%S <string>: 15112022_153751
+    Returns:
+        String datetime.
+    """
     now = datetime.datetime.now()
     return now.strftime("%d%m%Y_%H%M%S")
 
 @app.route("/")
 def index():
+    r"""Main URL of App and require login.
+
+    Returns:
+        Login page: login.html.
+    """
     return render_template("login.html")
 
 @app.route("/index")
 @login_required
 def home_index():
+    r"""Homepage of App.
+
+    Returns:
+        Homepage: index.html.
+        name<string>: Name of user login
+    """
     return render_template("index.html", name=current_user.name)
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -68,6 +83,7 @@ def login():
 
 @app.route('/signup', methods=['GET', 'POST'])  # we define the sign up path
 def signup():  # define the sign up function
+
     if request.method == 'GET':  # If the request is GET we return the sign up page and forms
         return render_template('signup.html')
     else:  # if the request is POST, then we check if the email doesn't already exist and then we save data
@@ -95,7 +111,8 @@ def logout():  # define the logout function
 
 
 @app.route('/train', methods=['GET', 'POST'])
-def training():    
+def training():
+    """Train an anomaly classification or segmentation model based on a provided configuration file."""    
     if request.method == 'POST':
         if not request.files["zip_input"]:
             flash('Please attach file for training', 'warning')
@@ -105,16 +122,20 @@ def training():
             file_name = file_zip.filename.rsplit('.')[0]
             zip_upload_path = f'static/uploads/{file_zip.filename}'
             file_zip.save(zip_upload_path)
+            # Extract dataset zip file
             with zipfile.ZipFile(zip_upload_path, 'r') as zip_ref:
                 zip_ref.extractall("./data")
+            
+            # Update config
             config = get_configurable_parameters(model_name="patchcore", config_path="configs/custom.yaml")
             config['dataset']['category'] = file_name
             config['project']['path'] = "./results"
             config['trainer']['default_root_dir'] = None
-
             save_yaml = OmegaConf.create(config)
             with tempfile.NamedTemporaryFile() as fp:
                 OmegaConf.save(config=save_yaml, f="configs/" + file_name + ".yaml")
+
+            # Training process
             datamodule = get_datamodule(config)
             model = get_model(config)
             experiment_logger = get_experiment_logger(config)
@@ -140,6 +161,14 @@ def training():
 
 @app.route("/inference", methods=(["GET", "POST"]))
 def inference_input():
+    """Inference function, return anomaly map, score, heat map, prediction mask and segmentation.
+    Args:
+        image (np.ndarray): image to compute
+        inferencer (Inferencer): model inferencer
+    Returns:
+        Tuple[string, string, string, np.ndarray, float, np.ndarray, np.ndarray, np.ndarray, string]:
+        input image, anomaly score, target label, heat_map, pred_mask, segmentation result and output image.
+    """
     if request.method == "POST" and current_user:
         if not request.files["image_input"] or not request.form["user_category"]:
             flash('Please check file and category', 'warning')
@@ -169,10 +198,20 @@ def inference_input():
 
 @app.route("/database", methods=(["GET", "POST"]))
 def database():
+    f"""Database of save account user and results of inference
+    Return:
+        Query all results in database in show in database page.
+    Except:
+        Return None result 
+    """
     return render_template("database.html", results=AnomalyDatabase.query.all(), name=current_user.name)
 
 @app.route('/delete/<int:id>')
 def delete(id):
+    f"""Function to delete a row in database result
+    Return:
+        Delete row and redirect database page.
+    """
     id_delete = AnomalyDatabase.query.get_or_404(id)
     db.session.delete(id_delete)
     db.session.commit()
@@ -180,6 +219,10 @@ def delete(id):
 
 @app.route("/document")
 def document():
+    f"""Document related to project
+    Return:
+        Document page with text and images..
+    """
     return render_template("document.html", name=current_user.name)
 
 if __name__ == '__main__':
