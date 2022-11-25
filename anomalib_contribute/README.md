@@ -21,6 +21,9 @@ pip install -r requirements.txt
 ## Flow model
 <img src='static/flow-app.jpg'>
 
+## Technology used
+<img src='static/technology_used.jpg'>
+
 ## Custom dataset
 For each new dataset, the data consist of three folders:
 - train, which contains the (defect-free) training images
