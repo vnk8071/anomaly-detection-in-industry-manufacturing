@@ -55,6 +55,8 @@ Default account login:
 - Username: anomalib
 - Password: anomalib
 
+Model supported:
+<img src='static/models_supported.jpg'>
 Login:
 <img src='static/login_app.jpg'>
 
@@ -101,3 +103,20 @@ docker-compose up
 ```
 
 Final: access link http://user-IPv4-public-ec2-aws
+
+## Reference
+```
+@misc{anomalib,
+      title={Anomalib: A Deep Learning Library for Anomaly Detection},
+      author={Samet Akcay and
+              Dick Ameln and
+              Ashwin Vaidya and
+              Barath Lakshmanan and
+              Nilesh Ahuja and
+              Utku Genc},
+      year={2022},
+      eprint={2202.08341},
+      archivePrefix={arXiv},
+      primaryClass={cs.CV}
+}
+```
