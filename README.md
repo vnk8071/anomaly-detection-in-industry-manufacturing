@@ -2,6 +2,7 @@
 
 ## Anomalib Contributor
 Folder: anomalib_contribute
+
 Link: https://github.com/openvinotoolkit/anomalib#1-web-based-pipeline-for-training-and-inference
 
 ## Dataset
