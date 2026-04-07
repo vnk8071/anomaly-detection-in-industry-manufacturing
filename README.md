@@ -1,112 +1,153 @@
 # Anomaly Detection in Industry Manufacturing
 
-## Anomalib Contributor
-Folder: anomalib_contribute
+## Anomalib Version Note (Legacy vs Current)
+
+Anomalib Contributor: `anomalib_contribute` folder
 
 Link: https://github.com/openvinotoolkit/anomalib#1-web-based-pipeline-for-training-and-inference
 
+This project was built against the legacy Anomalib API and pins `anomalib==0.3.6`.
+
+- Legacy pins: `anomalib_contribute/requirements.txt`, `deprecated/requirements.txt`
+
+Anomalib has since moved forward significantly (newer releases, updated APIs/CLI, docs). For the maintained upstream project, use:
+
+- Upstream repo (current): <https://github.com/open-edge-platform/anomalib>
+- Docs (current): <https://anomalib.readthedocs.io/en/latest/>
+
+Historically, Anomalib was hosted under `openvinotoolkit/anomalib`; it is now maintained at `open-edge-platform/anomalib`.
+
+If you install a newer Anomalib version, expect code/config changes may be required.
+
+## Project Layout
+
+- `anomalib_contribute/`: implementation built on legacy Anomalib
+- `deprecated/`: legacy snapshot (see folder for details)
+
 ## Dataset
-THE MVTEC ANOMALY DETECTION DATASET (MVTEC AD)
+
+### MVTec Anomaly Detection (MVTec AD)
 
 MVTec AD is a dataset for benchmarking anomaly detection methods with a focus on industrial inspection. It contains over 5000 high-resolution images divided into fifteen different object and texture categories. Each category comprises a set of defect-free training images and a test set of images with various kinds of defects as well as images without defects.
 
-<img src='static_images/mvtec_dataset.jpg'>
-Link dataset: <u>https://www.mvtec.com/company/research/datasets/mvtec-ad</u>
+![MVTec AD dataset](static_images/mvtec_dataset.jpg)
 
-## Install packages
-```
-conda create -n anomaly-detection python=3.8
+Dataset link: <https://www.mvtec.com/company/research/datasets/mvtec-ad>
+
+## Installation
+
+```bash
+conda create -n anomaly-detection python=3.10
 conda activate anomaly-detection
 pip install -r requirements.txt
 ```
+
 ## Flow
-<img src='static_images/flow-app.jpg'>
+
+![Flow](static_images/flow-app.jpg)
 
 ## Custom dataset
+
 For each new dataset, the data consist of three folders:
+
 - train, which contains the (defect-free) training images
 - test, which contains the test images
 - ground_truth, which contains the pixel-precise annotations of anomalous regions
-<img src='static_images/data_structure.jpg'>
+
+![Custom dataset structure](static_images/data_structure.jpg)
+
+## Hardware
+
+```text
+GPU available: True (mps), used: True
+TPU available: False, using: 0 TPU cores
+
+┏━━━┳━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━┳━━━━━━━━┳━━━━━━━┳━━━━━━━┓
+┃   ┃ Name           ┃ Type           ┃ Params ┃ Mode  ┃ FLOPs ┃
+┡━━━╇━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━╇━━━━━━━━╇━━━━━━━╇━━━━━━━┩
+│ 0 │ pre_processor  │ PreProcessor   │      0 │ train │     0 │
+│ 1 │ post_processor │ PostProcessor  │      0 │ train │     0 │
+│ 2 │ evaluator      │ Evaluator      │      0 │ train │     0 │
+│ 3 │ model          │ PatchcoreModel │  2.8 M │ train │     0 │
+└───┴────────────────┴────────────────┴────────┴───────┴───────┘
+Trainable params: 2.8 M
+Non-trainable params: 0
+Total params: 2.8 M
+Total estimated model params size (MB): 11
+Modules in train mode: 19
+Modules in eval mode: 69
+Total FLOPs: 0
+```
 
 ## Train
-```
+
+```bash
 python train.py --config "configs/patchcore_grid.yaml" --model "patchcore"
 ```
 
-or download pretrained models
-```
+Or download pretrained models:
+
+```bash
 bash download_pretrained.sh
 ```
 
 ## Evaluation (Coming soon)
+
 ## Inference
-```
+
+```bash
 python script_inference.py --config "configs/patchcore_hazelnut.yaml" --weight "models/patchcore_hazelnut.ckpt" --image "samples/007_hazelnut.png"
 ```
-or just simple:
-```
+
+Or (simple default):
+
+```bash
 python script_inference.py
 ```
-## App 
+
+## App
+
 ### Gradio
-```
+
+```bash
 python demo.py
 ```
+
 Open local URL: http://127.0.0.1:7860
 
 Sample:
-<img src='static_images/predict_demo.jpg'>
 
-### Flask
-```
+![Gradio sample](static_images/predict_demo.jpg)
+
+### FastAPI
+
+```bash
 python app.py
 ```
-Open local URL: http://127.0.0.1:5000
 
-Default account login:
-- Username: aicamp_batch9
-- Password: 123456
+Open local URL: http://127.0.0.1:8000
 
 Homepage:
-<img src='static_images/flask_homepage.jpg'>
+![Flask homepage](static_images/flask_homepage.jpg)
 
 Train:
-<img src='static_images/flask_train.jpg'>
+![Flask train](static_images/flask_train.jpg)
 
 Inference:
-<img src='static_images/flask_inference.jpg'>
+![Flask inference](static_images/flask_inference.jpg)
 
 Database:
-<img src='static_images/flask_database.jpg'>
+![Flask database](static_images/flask_database.jpg)
 
 ## Container
-```
+
+```bash
 docker build -t anomaly:v1 .
 docker run anomaly:v1
 ```
 
-or just simple
+Or:
 
-```
+```bash
 docker-compose up
 ```
-## Deploy AWS
-First: Create EC2 instance 
-
-Second: git clone and install related packages
-```
-git clone https://github.com/vnk8071/anomaly-detection-in-industry-manufacturing.git
-
-sh download_pretrained.sh
-```
-Next: install Miniconda and Docker engine
-
-- Miniconda: Follow link https://varhowto.com/install-miniconda-ubuntu-18-04/
-- Docker engine: Follow link https://docs.docker.com/engine/install/ubuntu/
-
-```
-docker-compose up
-```
-
-Final: access link http://user-IPv4-public-ec2-aws

@@ -1,69 +1,44 @@
-"""Anomalib Traning Script.
-This script reads the name of the model or config file from command
-line, train/test the anomaly model to get quantitative and qualitative
-results.
-"""
+"""CLI training script for Anomalib v2.x models."""
 
-# Copyright (C) 2022 Intel Corporation
-# SPDX-License-Identifier: Apache-2.0
+import argparse
 
-import logging
-import warnings
-from argparse import ArgumentParser, Namespace
-
-from pytorch_lightning import Trainer, seed_everything
-
-from anomalib.config import get_configurable_parameters
-from anomalib.data import get_datamodule
-from anomalib.models import get_model
-from anomalib.utils.callbacks import LoadModelCallback, get_callbacks
-from anomalib.utils.loggers import configure_logger, get_experiment_logger
-
-logger = logging.getLogger("anomalib")
+from src.anomaly.trainer import MODEL_REGISTRY, train_model
 
 
-def get_args() -> Namespace:
-    """Get command line arguments.
-    Returns:
-        Namespace: List of arguments.
-    """
-    parser = ArgumentParser()
-    parser.add_argument("--model", type=str, default="patchcore", help="Name of the algorithm to train/test")
-    parser.add_argument("--config", type=str, default="configs/aqa.yaml", help="Path to a model config file")
-    parser.add_argument("--log-level", type=str, default="INFO", help="<DEBUG, INFO, WARNING, ERROR>")
-
+def main():
+    parser = argparse.ArgumentParser(description="Train an anomaly detection model")
+    parser.add_argument("--dataset-root", required=True, help="Path to dataset root folder")
+    parser.add_argument("--dataset-name", required=True, help="Dataset name (used for checkpoint naming)")
+    parser.add_argument(
+        "--model",
+        default="patchcore",
+        choices=list(MODEL_REGISTRY.keys()),
+        help="Anomaly detection model",
+    )
+    parser.add_argument("--backbone", default="resnet18", help="Backbone architecture")
+    parser.add_argument(
+        "--task",
+        default="segmentation",
+        choices=["segmentation", "classification"],
+        help="Task type",
+    )
+    parser.add_argument("--image-size", type=int, default=224, help="Input image size")
+    parser.add_argument("--output-dir", default="./results", help="Engine output directory")
+    parser.add_argument("--models-dir", default="./models", help="Directory to save checkpoints")
     args = parser.parse_args()
-    return args
 
-
-def train():
-    """Train an anomaly classification or segmentation model based on a provided configuration file."""
-    args = get_args()
-    configure_logger(level=args.log_level)
-
-    if args.log_level == "ERROR":
-        warnings.filterwarnings("ignore")
-
-    config = get_configurable_parameters(model_name=args.model, config_path=args.config)
-    if config.project.seed:
-        seed_everything(config.project.seed)
-
-    datamodule = get_datamodule(config)
-    model = get_model(config)
-    experiment_logger = get_experiment_logger(config)
-    callbacks = get_callbacks(config)
-
-    trainer = Trainer(**config.trainer, logger=experiment_logger, callbacks=callbacks)
-    logger.info("Training the model.")
-    trainer.fit(model=model, datamodule=datamodule)
-
-    logger.info("Loading the best model weights.")
-    load_model_callback = LoadModelCallback(weights_path=trainer.checkpoint_callback.best_model_path)
-    trainer.callbacks.insert(0, load_model_callback)
-
-    logger.info("Testing the model.")
-    trainer.test(model=model, datamodule=datamodule)
+    ckpt_path = train_model(
+        dataset_root=args.dataset_root,
+        dataset_name=args.dataset_name,
+        model_name=args.model,
+        backbone=args.backbone,
+        task=args.task,
+        image_size=args.image_size,
+        output_dir=args.output_dir,
+        models_dir=args.models_dir,
+    )
+    print(f"Training complete. Model saved to: {ckpt_path}")
 
 
 if __name__ == "__main__":
-    train()
+    main()

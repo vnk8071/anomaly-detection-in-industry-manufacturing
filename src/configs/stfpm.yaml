@@ -1,0 +1,24 @@
+model:
+  class_path: anomalib.models.Stfpm
+  init_args:
+    backbone: resnet18
+    layers:
+      - layer1
+      - layer2
+      - layer3
+
+data:
+  class_path: anomalib.data.Folder
+  init_args:
+    name: custom
+    root: ./data/custom
+    normal_dir: train/good
+    abnormal_dir: test/defect
+    train_batch_size: 32
+    eval_batch_size: 1
+
+trainer:
+  accelerator: auto
+  devices: 1
+  max_epochs: 100
+  default_root_dir: ./results

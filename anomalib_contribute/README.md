@@ -1,5 +1,18 @@
 # Anomaly Detection in Industry Manufacturing
 
+## Anomalib version note (legacy vs current)
+
+This folder uses the legacy Anomalib API and pins `anomalib==0.3.6` (see `requirements.txt`).
+
+For the maintained upstream Anomalib project (newer releases, updated APIs/CLI, docs), refer to:
+
+- Upstream repo (current): https://github.com/open-edge-platform/anomalib
+- Docs (current): https://anomalib.readthedocs.io/en/latest/
+
+Historically, Anomalib was hosted under `openvinotoolkit/anomalib`; it is now maintained at `open-edge-platform/anomalib`.
+
+If you upgrade Anomalib, expect breaking changes and required updates to code/config.
+
 ## Introduction
 
 Anomalib is a deep learning library that aims to collect state-of-the-art anomaly detection algorithms for benchmarking on both public and private datasets. Anomalib provides several ready-to-use implementations of anomaly detection algorithms described in the recent literature, as well as a set of tools that facilitate the development and implementation of custom models. The library has a strong focus on image-based anomaly detection, where the goal of the algorithm is to identify anomalous images, or anomalous pixel regions within images in a dataset. Anomalib is constantly updated with new algorithms and training/inference extensions, so keep checking!

@@ -1,0 +1,22 @@
+model:
+  class_path: anomalib.models.Draem
+  init_args:
+    enable_sspcab: false
+    sspcab_lambda: 0.1
+    anomaly_source_path: null
+
+data:
+  class_path: anomalib.data.Folder
+  init_args:
+    name: custom
+    root: ./data/custom
+    normal_dir: train/good
+    abnormal_dir: test/defect
+    train_batch_size: 8
+    eval_batch_size: 1
+
+trainer:
+  accelerator: auto
+  devices: 1
+  max_epochs: 400
+  default_root_dir: ./results
