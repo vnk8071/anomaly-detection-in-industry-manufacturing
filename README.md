@@ -30,7 +30,7 @@ If you install a newer Anomalib version, expect code/config changes may be requi
 
 MVTec AD is a dataset for benchmarking anomaly detection methods with a focus on industrial inspection. It contains over 5000 high-resolution images divided into fifteen different object and texture categories. Each category comprises a set of defect-free training images and a test set of images with various kinds of defects as well as images without defects.
 
-![MVTec AD dataset](static_images/mvtec_dataset.jpg)
+![MVTec AD dataset](static/mvtec_dataset.jpg)
 
 Dataset link: <https://www.mvtec.com/company/research/datasets/mvtec-ad>
 
@@ -44,7 +44,7 @@ pip install -r requirements.txt
 
 ## Flow
 
-![Flow](static_images/flow-app.jpg)
+![Flow](static/flow-app.jpg)
 
 ## Custom dataset
 
@@ -54,7 +54,7 @@ For each new dataset, the data consist of three folders:
 - test, which contains the test images
 - ground_truth, which contains the pixel-precise annotations of anomalous regions
 
-![Custom dataset structure](static_images/data_structure.jpg)
+![Custom dataset structure](static/data_structure.jpg)
 
 ## Hardware
 
@@ -79,16 +79,14 @@ Modules in eval mode: 69
 Total FLOPs: 0
 ```
 
+## Models
+
+![models](static/models_supported.jpg)
+
 ## Train
 
 ```bash
 python train.py --config "configs/patchcore_grid.yaml" --model "patchcore"
-```
-
-Or download pretrained models:
-
-```bash
-bash download_pretrained.sh
 ```
 
 ## Evaluation (Coming soon)
@@ -117,7 +115,7 @@ Open local URL: http://127.0.0.1:7860
 
 Sample:
 
-![Gradio sample](static_images/predict_demo.jpg)
+![Gradio sample](static/predict_demo.jpg)
 
 ### FastAPI
 
@@ -128,16 +126,13 @@ python app.py
 Open local URL: http://127.0.0.1:8000
 
 Homepage:
-![Flask homepage](static_images/flask_homepage.jpg)
+![Flask homepage](static/home_app.jpg)
 
 Train:
-![Flask train](static_images/flask_train.jpg)
+![Flask train](static/train_app.jpg)
 
 Inference:
-![Flask inference](static_images/flask_inference.jpg)
-
-Database:
-![Flask database](static_images/flask_database.jpg)
+![Flask inference](static/inference_app.jpg)
 
 ## Container
 

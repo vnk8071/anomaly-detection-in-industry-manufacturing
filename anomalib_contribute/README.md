@@ -22,7 +22,7 @@ THE MVTEC ANOMALY DETECTION DATASET (MVTEC AD)
 
 MVTec AD is a dataset for benchmarking anomaly detection methods with a focus on industrial inspection. It contains over 5000 high-resolution images divided into fifteen different object and texture categories. Each category comprises a set of defect-free training images and a test set of images with various kinds of defects as well as images without defects.
 
-<img src='static/mvtec_dataset.jpg'>
+<img src='../static/mvtec_dataset.jpg'>
 Link dataset: <u>https://www.mvtec.com/company/research/datasets/mvtec-ad</u>
 
 ## Install packages
@@ -32,17 +32,17 @@ conda activate anomaly-detection
 pip install -r requirements.txt
 ```
 ## Flow model
-<img src='static/flow-app.jpg'>
+<img src='../static/flow-app.jpg'>
 
 ## Technology used
-<img src='static/technology_used.jpg'>
+<img src='../static/technology_used.jpg'>
 
 ## Custom dataset
 For each new dataset, the data consist of three folders:
 - train, which contains the (defect-free) training images
 - test, which contains the test images
 - ground_truth, which contains the pixel-precise annotations of anomalous regions
-<img src='static/data_structure.jpg'>
+<img src='../static/data_structure.jpg'>
 
 Data custom sample: <a
             href="https://drive.google.com/drive/folders/1mUhEG-eHZetGabc9tC8YhvI8KIAu7AAn?usp=share_link">Link
@@ -55,7 +55,7 @@ python train.py --config "configs/patchcore.yaml" --model "patchcore"
 ## Evaluation (Coming soon)
 ## Inference
 ```
-python script_inference.py --config "configs/patchcore_resnet18_aqa.yaml" --weight "models/patchcore_resnet18_aqa.ckpt" --image "static/aqa.png"
+python script_inference.py --config "configs/patchcore_resnet18_aqa.yaml" --weight "models/patchcore_resnet18_aqa.ckpt" --image "../static/aqa.png"
 ```
 or just simple:
 ```
@@ -72,24 +72,24 @@ Default account login:
 - Password: anomalib
 
 Model supported:
-<img src='static/models_supported.jpg'>
+<img src='../static/models_supported.jpg'>
 Login:
-<img src='static/login_app.jpg'>
+<img src='../static/login_app.jpg'>
 
 Signup:
-<img src='static/signup_app.jpg'>
+<img src='../static/signup_app.jpg'>
 
 Homepage:
-<img src='static/home_app.jpg'>
+<img src='../static/home_app.jpg'>
 
 Train:
-<img src='static/train_app.jpg'>
+<img src='../static/train_app.jpg'>
 
 Inference:
-<img src='static/inference_app.jpg'>
+<img src='../static/inference_app.jpg'>
 
 Database:
-<img src='static/database_app.jpg'>
+<img src='../static/database_app.jpg'>
 
 ## Container
 ```
