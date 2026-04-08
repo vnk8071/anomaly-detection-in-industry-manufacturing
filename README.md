@@ -2,9 +2,9 @@
 
 ## Anomalib Version Note (Legacy vs Current)
 
-Anomalib Contributor: `anomalib_contribute` folder
-
-Link: https://github.com/openvinotoolkit/anomalib#1-web-based-pipeline-for-training-and-inference
+- Anomalib Contributor: `anomalib_contribute` folder.
+- New Commit: https://github.com/open-edge-platform/anomalib/commit/70fabcdb63620ed77a74c66985afa6c803359c5f
+- Deprecated README: https://github.com/openvinotoolkit/anomalib#1-web-based-pipeline-for-training-and-inference
 
 This project was built against the legacy Anomalib API and pins `anomalib==0.3.6`.
 
