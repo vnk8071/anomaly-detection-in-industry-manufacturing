@@ -70,6 +70,24 @@ def _run_benchmark(
     }
 
 
+def _try_get_ort_providers(inferencer: AnomalyInferencer) -> list[str] | None:
+    sess = getattr(getattr(inferencer, "_inferencer", None), "session", None)
+    if sess is None:
+        return None
+    try:
+        return list(sess.get_providers())
+    except Exception:
+        return None
+
+
+def _try_end_ort_profiling(inferencer: AnomalyInferencer) -> str | None:
+    inner = getattr(inferencer, "_inferencer", None)
+    fn = getattr(inner, "end_profiling", None)
+    if callable(fn):
+        return fn()
+    return None
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Benchmark torch vs onnx backends")
     parser.add_argument("--image", required=True, help="Path to input image")
@@ -79,6 +97,11 @@ def main() -> None:
         "--openvino-model",
         default=None,
         help="Optional path to .onnx model for OpenVINO (defaults to --onnx-model)",
+    )
+    parser.add_argument(
+        "--openvino-int8-model",
+        default=None,
+        help="Optional path to OpenVINO INT8 IR (model.xml) to benchmark",
     )
     parser.add_argument(
         "--input-size", type=int, default=224, help="ONNX preprocessing input size"
@@ -109,6 +132,26 @@ def main() -> None:
         action="store_true",
         help="Also benchmark OpenVINO Runtime (device AUTO)",
     )
+    parser.add_argument(
+        "--openvino-compare-int8",
+        action="store_true",
+        help="Benchmark OpenVINO FP32 (onnx) and INT8 IR (model.xml)",
+    )
+    parser.add_argument(
+        "--ort-report-providers",
+        action="store_true",
+        help="Include the actual ORT providers used in output JSON",
+    )
+    parser.add_argument(
+        "--ort-profile",
+        action="store_true",
+        help="Enable ORT profiling (writes a JSON profile file)",
+    )
+    parser.add_argument(
+        "--ort-profile-dir",
+        default="./results/ort_profiles",
+        help="Where to write ORT profile JSON files",
+    )
     args = parser.parse_args()
 
     if args.trust_remote_code:
@@ -129,12 +172,20 @@ def main() -> None:
             backend="onnx",
             input_size=args.input_size,
             onnx_providers=["CoreMLExecutionProvider", "CPUExecutionProvider"],
+            onnx_enable_profiling=bool(args.ort_profile),
+            onnx_profile_prefix=str(Path(args.ort_profile_dir) / "onnx_coreml")
+            if args.ort_profile
+            else None,
         )
         onnx_variants["onnx_cpu"] = AnomalyInferencer(
             args.onnx_model,
             backend="onnx",
             input_size=args.input_size,
             onnx_providers=["CPUExecutionProvider"],
+            onnx_enable_profiling=bool(args.ort_profile),
+            onnx_profile_prefix=str(Path(args.ort_profile_dir) / "onnx_cpu")
+            if args.ort_profile
+            else None,
         )
     else:
         onnx_variants["onnx"] = AnomalyInferencer(
@@ -142,6 +193,10 @@ def main() -> None:
             backend="onnx",
             input_size=args.input_size,
             onnx_providers=None,
+            onnx_enable_profiling=bool(args.ort_profile),
+            onnx_profile_prefix=str(Path(args.ort_profile_dir) / "onnx")
+            if args.ort_profile
+            else None,
         )
 
     results: dict = {
@@ -164,20 +219,61 @@ def main() -> None:
             runs=args.runs,
         )
 
-    if args.openvino:
+        if args.ort_report_providers:
+            providers = _try_get_ort_providers(inf)
+            if providers is not None:
+                results[name]["ort_providers"] = providers
+
+        if args.ort_profile:
+            Path(args.ort_profile_dir).mkdir(parents=True, exist_ok=True)
+            profile_path = _try_end_ort_profiling(inf)
+            if profile_path:
+                results[name]["ort_profile"] = profile_path
+
+    if args.openvino or args.openvino_compare_int8:
         ov_model = args.openvino_model or args.onnx_model
-        ov_inf = AnomalyInferencer(
-            ov_model,
-            backend="openvino",
-            input_size=args.input_size,
-            openvino_device="AUTO",
-        )
-        results["openvino_auto"] = _run_benchmark(
-            inferencer=ov_inf,
-            image=image,
-            warmup=args.warmup,
-            runs=args.runs,
-        )
+
+        # OpenVINO may not support all INT8 QDQ graphs depending on version/plugins.
+        # If the provided ONNX is an int8 artifact, try the matching fp32 model.
+        ov_model_path = Path(ov_model)
+        if args.openvino_model is None and ov_model_path.name.endswith(".int8.onnx"):
+            fp32_candidate = ov_model_path.with_name(
+                ov_model_path.name.replace(".int8.onnx", ".onnx")
+            )
+            if fp32_candidate.is_file():
+                ov_model = str(fp32_candidate)
+
+        def _bench_openvino(key: str, model_path: str) -> None:
+            try:
+                ov_inf = AnomalyInferencer(
+                    model_path,
+                    backend="openvino",
+                    input_size=args.input_size,
+                    openvino_device="AUTO",
+                )
+                results[key] = _run_benchmark(
+                    inferencer=ov_inf,
+                    image=image,
+                    warmup=args.warmup,
+                    runs=args.runs,
+                )
+                results[key]["model"] = model_path
+            except Exception as e:
+                results[key] = {
+                    "error": f"{type(e).__name__}: {e}",
+                    "model": model_path,
+                }
+
+        if args.openvino_compare_int8:
+            _bench_openvino("openvino_auto_fp32", ov_model)
+            if args.openvino_int8_model:
+                _bench_openvino("openvino_auto_int8", args.openvino_int8_model)
+            else:
+                results["openvino_auto_int8"] = {
+                    "error": "Missing --openvino-int8-model (expected path to model.xml)",
+                }
+        else:
+            _bench_openvino("openvino_auto", ov_model)
 
     print(json.dumps(results, indent=2, sort_keys=True))
     if args.json_out:

@@ -27,13 +27,19 @@ class AnomalyInferencer:
         input_size: int = 224,
         onnx_providers: list[str] | None = None,
         openvino_device: str = "AUTO",
+        onnx_enable_profiling: bool = False,
+        onnx_profile_prefix: str | None = None,
     ):
         self.backend = backend
         if backend == "torch":
             self._inferencer = TorchInferencer(path=Path(model_path))
         elif backend == "onnx":
             self._inferencer = OnnxRuntimeInferencer(
-                model_path, input_size=input_size, providers=onnx_providers
+                model_path,
+                input_size=input_size,
+                providers=onnx_providers,
+                enable_profiling=onnx_enable_profiling,
+                profile_prefix=onnx_profile_prefix,
             )
         elif backend == "openvino":
             self._inferencer = OpenVINOInferencer(

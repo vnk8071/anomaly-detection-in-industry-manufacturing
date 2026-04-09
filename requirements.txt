@@ -13,6 +13,7 @@ onnxscript>=0.1.0
 
 # OpenVINO
 openvino>=2024.0
+nncf>=2.10.0
 
 # Web framework
 fastapi>=0.111.0

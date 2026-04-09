@@ -34,7 +34,12 @@ class OpenVINOInferencer:
         self.score_threshold = float(score_threshold)
 
         core = Core()
-        model = core.read_model(model=str(self.model_path))
+
+        # Support OpenVINO IR (model.xml) and ONNX.
+        if self.model_path.suffix.lower() == ".xml":
+            model = core.read_model(model=str(self.model_path))
+        else:
+            model = core.read_model(model=str(self.model_path))
         self.compiled = core.compile_model(model=model, device_name=self.device)
         self.input_layer = self.compiled.inputs[0]
         self.output_layers = list(self.compiled.outputs)

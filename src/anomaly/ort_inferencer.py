@@ -31,17 +31,34 @@ class OnnxRuntimeInferencer:
         input_size: int = 224,
         providers: list[str] | None = None,
         score_threshold: float = 0.5,
+        enable_profiling: bool = False,
+        profile_prefix: str | None = None,
     ):
         import onnxruntime as ort
 
         self.onnx_path = Path(onnx_path)
         self.input_size = int(input_size)
         self.score_threshold = float(score_threshold)
+
+        sess_opts = ort.SessionOptions()
+        if enable_profiling:
+            sess_opts.enable_profiling = True
+            if profile_prefix:
+                sess_opts.profile_file_prefix = str(profile_prefix)
+
         self.session = ort.InferenceSession(
             str(self.onnx_path),
+            sess_options=sess_opts,
             providers=providers or ort.get_available_providers(),
         )
         self.input_name = self.session.get_inputs()[0].name
+
+    def end_profiling(self) -> str | None:
+        """End ORT profiling and return the profile file path (if enabled)."""
+        try:
+            return self.session.end_profiling()
+        except Exception:
+            return None
 
     def predict(self, image_path: str) -> dict:
         original = cv2.imread(image_path)

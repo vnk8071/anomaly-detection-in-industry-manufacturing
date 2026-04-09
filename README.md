@@ -114,7 +114,8 @@ python benchmark.py \
   --onnx-model models/patchcore_resnet18_aqa.onnx \
   --warmup 5 --runs 50 \
   --onnx-compare-coreml \
-  --openvino \
+  --openvino-compare-int8 \
+  --openvino-int8-model models/openvino_int8/patchcore_resnet18_aqa/model.xml \
   --trust-remote-code
 ```
 
@@ -122,10 +123,48 @@ Sample results (image=`static/aqa.png`, warmup=5, runs=50):
 
 | Backend | FPS | Mean (ms) | P50 (ms) | P95 (ms) | P99 (ms) | Min (ms) | Max (ms) |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| PyTorch (`TorchInferencer`) | 16.20 | 61.74 | 59.97 | 73.35 | 73.63 | 58.45 | 73.81 |
-| ONNXRuntime (CoreML EP) | 24.34 | 41.09 | 41.13 | 41.92 | 42.15 | 40.01 | 42.17 |
-| ONNXRuntime (CPU) | 19.57 | 51.10 | 49.80 | 58.22 | 59.03 | 46.56 | 59.50 |
-| OpenVINO (`AUTO`) | 22.01 | 45.44 | 45.25 | 47.51 | 48.92 | 43.91 | 49.94 |
+| PyTorch (`TorchInferencer`) | 15.49 | 64.55 | 63.66 | 72.58 | 77.41 | 59.84 | 81.41 |
+| ONNXRuntime (CoreML EP) | 24.43 | 40.93 | 40.93 | 41.63 | 42.71 | 39.80 | 43.19 |
+| ONNXRuntime (CPU) | 20.62 | 48.50 | 48.31 | 50.70 | 51.46 | 46.34 | 51.53 |
+| OpenVINO (`AUTO`, FP32) | 20.67 | 48.38 | 48.11 | 52.14 | 56.29 | 44.51 | 58.21 |
+| OpenVINO (`AUTO`, INT8) | 21.66 | 46.16 | 45.40 | 50.53 | 53.06 | 44.20 | 54.33 |
+
+## ONNX INT8 Quantization (Static)
+
+Static INT8 quantization uses a calibration set of representative images:
+
+```bash
+python quantize_onnx_static.py \
+  --onnx models/patchcore_resnet18_aqa.onnx \
+  --out models/patchcore_resnet18_aqa.int8.onnx \
+  --calib-dir <path-to-calibration-images> \
+  --num-samples 200 \
+  --input-size 224
+```
+
+## OpenVINO INT8 Quantization (PTQ)
+
+Recommended for OpenVINO instead of importing an INT8 QDQ ONNX graph:
+
+```bash
+python quantize_openvino_int8.py \
+  --onnx models/patchcore_resnet18_aqa.onnx \
+  --out-dir models/openvino_int8/patchcore_resnet18_aqa \
+  --calib-dir <path-to-calibration-images> \
+  --num-samples 200 \
+  --input-size 224
+```
+
+Then run inference with the generated OpenVINO IR:
+
+```bash
+python inference.py \
+  --backend openvino \
+  --openvino-device AUTO \
+  --model models/openvino_int8/patchcore_resnet18_aqa/model.xml \
+  --image static/aqa.png
+```
+
 
 ## App
 

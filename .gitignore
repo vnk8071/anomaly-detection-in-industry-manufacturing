@@ -129,4 +129,5 @@ dmypy.json
 
 data/
 models/
-results/
+results*
+anomalib/
