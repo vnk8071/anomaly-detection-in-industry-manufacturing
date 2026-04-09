@@ -6,6 +6,14 @@ torch>=2.1.0
 torchvision>=0.16.0
 lightning>=2.1.0
 
+# ONNX
+onnx>=1.16.0
+onnxruntime>=1.18.0
+onnxscript>=0.1.0
+
+# OpenVINO
+openvino>=2024.0
+
 # Web framework
 fastapi>=0.111.0
 uvicorn[standard]>=0.29.0

@@ -1,15 +1,48 @@
+from __future__ import annotations
+
 from pathlib import Path
 
 import cv2
 import numpy as np
 from anomalib.deploy import TorchInferencer
 
+from src.anomaly.ort_inferencer import OnnxRuntimeInferencer
+from src.anomaly.openvino_inferencer import OpenVINOInferencer
+
 
 class AnomalyInferencer:
-    """Thin wrapper around anomalib v2.x TorchInferencer."""
+    """Thin wrapper around inferencer backends.
 
-    def __init__(self, ckpt_path: str):
-        self._inferencer = TorchInferencer(path=Path(ckpt_path))
+    Backends:
+    - torch: anomalib.deploy.TorchInferencer on `.pt`/`.ckpt`
+    - onnx: ONNXRuntime on `.onnx`
+    - openvino: OpenVINO Runtime on `.onnx`
+    """
+
+    def __init__(
+        self,
+        model_path: str,
+        *,
+        backend: str = "torch",
+        input_size: int = 224,
+        onnx_providers: list[str] | None = None,
+        openvino_device: str = "AUTO",
+    ):
+        self.backend = backend
+        if backend == "torch":
+            self._inferencer = TorchInferencer(path=Path(model_path))
+        elif backend == "onnx":
+            self._inferencer = OnnxRuntimeInferencer(
+                model_path, input_size=input_size, providers=onnx_providers
+            )
+        elif backend == "openvino":
+            self._inferencer = OpenVINOInferencer(
+                model_path,
+                input_size=input_size,
+                device=openvino_device,
+            )
+        else:
+            raise ValueError("backend must be one of: 'torch', 'onnx', 'openvino'")
 
     def predict(self, image_path: str) -> dict:
         """Run inference on a single image.
@@ -21,6 +54,10 @@ class AnomalyInferencer:
             pred_mask    – uint8 ndarray (H x W) binary mask
             segmentation – BGR ndarray (H x W x 3) contour overlay
         """
+        if self.backend in {"onnx", "openvino"}:
+            # ONNXRuntimeInferencer returns the final dict already.
+            return self._inferencer.predict(image_path)
+
         raw = self._inferencer.predict(image=Path(image_path))
         pred = raw.to_numpy()
 

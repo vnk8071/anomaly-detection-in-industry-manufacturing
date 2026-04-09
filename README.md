@@ -103,6 +103,30 @@ Or (simple default):
 python script_inference.py
 ```
 
+## Benchmark (PyTorch vs ONNXRuntime vs OpenVINO)
+
+Run:
+
+```bash
+python benchmark.py \
+  --image static/aqa.png \
+  --torch-model models/patchcore_resnet18_aqa.pt \
+  --onnx-model models/patchcore_resnet18_aqa.onnx \
+  --warmup 5 --runs 50 \
+  --onnx-compare-coreml \
+  --openvino \
+  --trust-remote-code
+```
+
+Sample results (image=`static/aqa.png`, warmup=5, runs=50):
+
+| Backend | FPS | Mean (ms) | P50 (ms) | P95 (ms) | P99 (ms) | Min (ms) | Max (ms) |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| PyTorch (`TorchInferencer`) | 16.20 | 61.74 | 59.97 | 73.35 | 73.63 | 58.45 | 73.81 |
+| ONNXRuntime (CoreML EP) | 24.34 | 41.09 | 41.13 | 41.92 | 42.15 | 40.01 | 42.17 |
+| ONNXRuntime (CPU) | 19.57 | 51.10 | 49.80 | 58.22 | 59.03 | 46.56 | 59.50 |
+| OpenVINO (`AUTO`) | 22.01 | 45.44 | 45.25 | 47.51 | 48.92 | 43.91 | 49.94 |
+
 ## App
 
 ### Gradio
